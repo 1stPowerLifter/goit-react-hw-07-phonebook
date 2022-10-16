@@ -1,3 +1,1 @@
-export const getContacts = state => state.contacts.contacts;
-
-export const getFilter = state => state.filters;
+export const selectFilter = state => state.filters;

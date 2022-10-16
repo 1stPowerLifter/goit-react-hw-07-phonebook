@@ -1,32 +1,33 @@
 import { Box } from 'components/Box';
 import { Formik, Field } from 'formik';
-import { useDispatch, useSelector } from 'react-redux';
-import { addContact } from 'redux/contactsSlice';
-import { getContacts} from 'redux/selectors'
+import { useAddContactMutation, useGetContactsQuery } from 'redux/contactsSlice';
 import PropTypes from 'prop-types';
 import { StyledForm, FormButton } from './Phonebook.styled';
 
 const INITIAL_VALUES = { name: "", number: "" }
 
 export const Phonebook = ({ title }) => {
-    const dispatch = useDispatch();
-    const contacts = useSelector(getContacts);
+    const [addContact, {isLoading}] = useAddContactMutation()
+    const { data = [] } = useGetContactsQuery()
 
-    const handleSubmit = ({name, number}, { resetForm }) => {
-        if (contacts.some(contact => contact.name === name)) {
-            alert(`${name} is alredy in contarts`)
+    const handleAddContact = async value => {
+        if (data.some(contact => contact.name === value.name)) {
+            alert(`${value.name} is alredy in contarts`)
         } else {
-            dispatch(addContact(name, number))
-            resetForm()
+            try {
+                await addContact(value);
+                alert(`${value.name} added to phonebook`)
+            } catch (error) {
+                alert("Error. Something wrong")
+            }
         }
     }
-
     return (
         <Box py={5} px={4}>
             <h2>{title}</h2>
 
             <Formik initialValues={INITIAL_VALUES}
-                onSubmit={handleSubmit}>
+                onSubmit={handleAddContact}>
                 <StyledForm autoComplete='off'>
                     <Box display="inline-flex"
                         flexDirection="column"
@@ -55,7 +56,7 @@ export const Phonebook = ({ title }) => {
                         />
                     </Box>
                             
-                    <FormButton type="submit">
+                    <FormButton type="submit" disabled={isLoading}>
                         Add contact
                     </FormButton>
                     

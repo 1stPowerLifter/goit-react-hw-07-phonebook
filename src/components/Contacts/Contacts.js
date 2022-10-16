@@ -2,18 +2,18 @@ import PropTypes from 'prop-types';
 import { Box } from 'components/Box';
 import { DeleteContact } from './Contacts.styled';
 import { useDispatch, useSelector } from 'react-redux';
-import { getContacts, getFilter } from 'redux/selectors';
+import { selectFilter } from 'redux/selectors';
 import { setFilter } from 'redux/filterSlice';
-import { deleteContact } from 'redux/contactsSlice';
+import { useDeleteContactMutation, useGetContactsQuery } from 'redux/contactsSlice';
 
 
 export const Contacts = ({ title }) => {
     const dispatch = useDispatch();
-    const contacts = useSelector(getContacts);
-    const filter = useSelector(getFilter);
-
-
-    const visibleContacts = contacts.filter(contact => contact.name.toLowerCase().includes(filter.toLowerCase()))
+    const filter = useSelector(selectFilter)
+    const { data = [] } = useGetContactsQuery()
+    const [deleteContact, { isLoading: deleteLoading }] = useDeleteContactMutation()
+    
+    const visibleContacts = data.filter(contact => contact.name.toLowerCase().includes(filter.toLowerCase()))
 
     const renderContacts = () => {
         
@@ -22,7 +22,7 @@ export const Contacts = ({ title }) => {
                 return (
                     <Box as="li" display="flex" mb={3} p={2} width="250px" borderRadius="16px"
                         justifyContent="space-between" border="1px dashed black"
-                        key={id}><div>{name}: {number}</div><DeleteContact onClick={() => dispatch(deleteContact(id))}>X</DeleteContact></Box>
+                        key={id}><div>{name}: {number}</div><DeleteContact onClick={() => deleteContact(id)} disabled={deleteLoading}>X</DeleteContact></Box>
                 )
             })
     }
